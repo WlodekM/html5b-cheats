@@ -2203,6 +2203,14 @@ function menuLevelCreator() {
 	resetLevelCreator();
 }
 
+function menuCheats() {
+	menuScreen = 10;
+}
+
+function menuExitCheats() {
+	menuScreen = 0;
+}
+
 function menuExitLevelCreator() {
 	menuScreen = 0;
 }
@@ -2335,7 +2343,7 @@ function exitExploreLevel() {
 	cameraY = 0;
 }
 
-function drawMenu0Button(text, x, y, id, grayed, action) {
+function drawMenu0Button(text, x, y, id, grayed, action, fontSize=30) {
 	let fill = '#ffffff';
 	if (!grayed) {
 		if (!lcPopUp && onRect(_xmouse, _ymouse, x, y, menu0ButtonSize.w, menu0ButtonSize.h)) {
@@ -2353,7 +2361,7 @@ function drawMenu0Button(text, x, y, id, grayed, action) {
 
 	drawRoundedRect(fill, x, y, menu0ButtonSize.w, menu0ButtonSize.h, menu0ButtonSize.cr);
 
-	ctx.font = 'bold 30px Helvetica';
+	ctx.font = `bold ${fontSize}px Helvetica`;
 	ctx.fillStyle = '#666666';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
@@ -2570,8 +2578,6 @@ function drawMenu() {
 	ctx.font = '20px Helvetica';
 	ctx.fillText(version, 5, cheight);
 
-	if (levelProgress > 99) drawMenu0Button('WATCH BFDIA 5c', 665.55, 303.75, 0, false, menuWatchC);
-	else drawMenu0Button('WATCH BFDIA 5a', 665.55, 303.75, 0, false, menuWatchA);
 	if (showingNewGame2) {
 		drawRoundedRect('#ffffff', 665.5, 81, 273, 72.95, 15);
 		ctx.font = '20px Helvetica';
@@ -2581,10 +2587,47 @@ function drawMenu() {
 		linebreakText('Are you sure you want to\nerase your saved progress\nand start a new game?', 802, 84.3, 22);
 		drawNewGame2Button('YES', 680.4, 169.75, 5, '#993333', menuNewGame2yes);
 		drawNewGame2Button('NO', 815.9, 169.75, 6, '#1a4d1a', menuNewGame2no);
-	} else drawMenu0Button('NEW GAME', 665.55, 348.4, 1, false, menuNewGame);
+	} else {
+		drawMenu0Button('NEW GAME', 665.55, 348.4, 1, false, menuNewGame);
+		drawMenu0Button('CHEATS', 665.55, 259.1, 6, false, menuCheats);
+		if (levelProgress > 99) drawMenu0Button('WATCH BFDIA 5c', 665.55, 303.75, -40, false, menuWatchC);
+		else drawMenu0Button('WATCH BFDIA 5a', 665.55, 303.75, 0, false, menuWatchA);
+	}
 	drawMenu0Button('CONTINUE GAME', 665.55, 393.05, 2, levelProgress == 0, menuContGame);
+	
 	drawMenu0Button('EXPLORE (pre-α)', 665.55, 482.5, 4, false, menuExplore);
 	drawMenu0Button('LEVEL CREATOR', 665.55, 437.7, 3, false, menuLevelCreator);
+
+	// let started = true;
+	// if (bfdia5b.data.levelProgress == undefined || bfdia5b.data.levelProgress == 0) {
+	//    started = false;
+	// }
+}
+function lockAll()   {levelProgress = 0}
+function unlockAll() {levelProgress = levels.length}
+function lockAllC() {for (let i = 0; i < gotCoin.length; i++) {gotCoin[i] = false}; coins = 0}
+function unlockAllC() {for (let i = 0; i < gotCoin.length; i++) {gotCoin[i] = true};coins = levels.length}
+function drawChatsHelp() {
+	ctx.fillStyle = '#666666';
+	ctx.fillRect(0, 0, cwidth, cheight);
+	ctx.drawImage(svgMenu0, 0, 0);
+	ctx.fillStyle = '#ffffff';
+	ctx.textBaseline = 'bottom';
+	ctx.textAlign = 'left';
+	ctx.font = '20px Helvetica';
+	ctx.fillText(version, 5, cheight);
+	let buttonY = 437.7 
+	buttonY += (44.8)
+	drawMenu0Button('BACK', 665.55, buttonY, 40, false, menuExitCheats);
+	buttonY -= (44.8 / 2)
+	buttonY -= (44.8)
+	drawMenu0Button('UNLOCK ALL LEVELS', 665.55, buttonY, 41, false, unlockAll, 25);
+	buttonY -= (44.8)
+	drawMenu0Button('LOCK ALL LEVELS', 665.55, buttonY, 41, false, lockAll, 28);
+	buttonY -= (44.8)
+	drawMenu0Button('UNLOCK ALL COINS', 665.55, buttonY, 41, false, unlockAllC, 25);
+	buttonY -= (44.8)
+	drawMenu0Button('LOCK ALL COINS', 665.55, buttonY, 41, false, lockAllC, 28);
 
 	// let started = true;
 	// if (bfdia5b.data.levelProgress == undefined || bfdia5b.data.levelProgress == 0) {
@@ -6917,6 +6960,28 @@ function keydown(event) {
 			undo();
 		}
 	}
+	var minChar
+	if(currentLevel == 51) {
+		minChar = 1
+	} else {
+		minChar = 0
+	}
+    if (event.key == '`') {
+		for(let i = minChar; i < charCount2 + minChar; i++) {
+			char[i].x = _xmouse + cameraX
+			char[i].y = _ymouse + cameraY
+			char[i].vx = 0
+			char[i].vy = 0
+		}
+    }
+	for(let i = minChar; i < charCount2 + minChar; i++) {
+		if (event.key == i + 1) {
+			char[i].x = _xmouse + cameraX
+			char[i].y = _ymouse + cameraY
+			char[i].vx = 0
+			char[i].vy = 0
+		}
+	}
 }
 
 function keyup(event) {
@@ -9033,6 +9098,9 @@ function draw() {
 
 			drawMenu2_3Button(1, 837.5, 486.95, menuExploreBack);
 			break;
+		
+		case 10:
+			drawChatsHelp()
 	}
 
 	if (levelTimer <= 30 || menuScreen != 3) {
